@@ -4,7 +4,7 @@ from nltk.corpus import wordnet
 
 #accept user input
 def get_user_input():
-	print(sys.argv[1])
+	print((sys.argv[1]))
 
 #return dependency tree
 def create_dependency_tree():
@@ -22,7 +22,7 @@ def get_root_word(dependency_tree):
 	return root
 
 def get_dependent_object(dependency_tree):
-	print len(dependency_tree)
+	print(len(dependency_tree))
 	for string in dependency_tree:
 		if string.find("dobj") != -1:
 			dobj = string.split()[1]

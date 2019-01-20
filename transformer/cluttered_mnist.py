@@ -157,17 +157,17 @@ for epoch_i in range(n_epochs):
                                 y: batch_ys,
                                 keep_prob: 1.0
                             })
-            print('Iteration: ' + str(iter_i) + ' Loss: ' + str(loss))
+            print(('Iteration: ' + str(iter_i) + ' Loss: ' + str(loss)))
 
         sess.run(optimizer, feed_dict={
             x: batch_xs, y: batch_ys, keep_prob: 0.8})
 
-    print('Accuracy (%d): ' % epoch_i + str(sess.run(accuracy,
+    print(('Accuracy (%d): ' % epoch_i + str(sess.run(accuracy,
                                                      feed_dict={
                                                          x: X_valid,
                                                          y: Y_valid,
                                                          keep_prob: 1.0
-                                                     })))
+                                                     }))))
     # theta = sess.run(h_fc_loc2, feed_dict={
     #        x: batch_xs, keep_prob: 1.0})
     # print(theta[0])

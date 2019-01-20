@@ -89,7 +89,7 @@ def quantize_weights_op(quant_scale, max_value):
 def relaxed_average(var_name_suffix, rx_step):
   """Calculate the average of relaxed variables having var_name_suffix."""
   relaxed_vars = []
-  for l in xrange(rx_step):
+  for l in range(rx_step):
     with tf.variable_scope("RX%d" % l, reuse=True):
       try:
         relaxed_vars.append(tf.get_variable(var_name_suffix))
@@ -160,7 +160,7 @@ class NeuralGPU(object):
     # Feeds for inputs, targets, outputs, losses, etc.
     self.input = []
     self.target = []
-    for l in xrange(data_utils.forward_max + 1):
+    for l in range(data_utils.forward_max + 1):
       self.input.append(tf.placeholder(tf.int32, name="inp{0}".format(l)))
       self.target.append(tf.placeholder(tf.int32, name="tgt{0}".format(l)))
     self.outputs = []
@@ -193,33 +193,33 @@ class NeuralGPU(object):
       with tf.device("/cpu:0"):
         with tf.control_dependencies([e0]):
           embedded = [tf.nn.embedding_lookup(emb_weights, self.input[l])
-                      for l in xrange(length)]
+                      for l in range(length)]
         # Mask to 0-out padding space in each step.
-        imask = [check_for_zero(self.input[l]) for l in xrange(length)]
-        omask = [check_for_zero(self.target[l]) for l in xrange(length)]
-        mask = [1.0 - (imask[i] * omask[i]) for i in xrange(length)]
+        imask = [check_for_zero(self.input[l]) for l in range(length)]
+        omask = [check_for_zero(self.target[l]) for l in range(length)]
+        mask = [1.0 - (imask[i] * omask[i]) for i in range(length)]
         mask = [tf.reshape(m, [-1, 1]) for m in mask]
         # Use a shifted mask for step scaling and concatenated for weights.
         shifted_mask = mask + [tf.zeros_like(mask[0])]
         scales = [shifted_mask[i] * (1.0 - shifted_mask[i+1])
-                  for i in xrange(length)]
+                  for i in range(length)]
         scales = [tf.reshape(s, [-1, 1, 1, 1]) for s in scales]
         mask = tf.concat(1, mask[0:length])  # batch x length
         weights = mask
         # Add a height dimension to mask to use later for masking.
         mask = tf.reshape(mask, [-1, length, 1, 1])
-        mask = tf.concat(2, [mask for _ in xrange(height)]) + tf.zeros(
+        mask = tf.concat(2, [mask for _ in range(height)]) + tf.zeros(
             tf.pack([batch_size, length, height, nmaps]), dtype=tf.float32)
 
       # Start is a length-list of batch-by-nmaps tensors, reshape and concat.
-      start = [tf.tanh(embedded[l]) for l in xrange(length)]
-      start = [tf.reshape(start[l], [-1, 1, nmaps]) for l in xrange(length)]
+      start = [tf.tanh(embedded[l]) for l in range(length)]
+      start = [tf.reshape(start[l], [-1, 1, nmaps]) for l in range(length)]
       start = tf.reshape(tf.concat(1, start), [-1, length, 1, nmaps])
 
       # First image comes from start by applying one convolution and adding 0s.
       first = conv_linear(start, 1, 1, vec_size, nmaps, True, 0.0, "input")
       first = [first] + [tf.zeros(tf.pack([batch_size, length, 1, nmaps]),
-                                  dtype=tf.float32) for _ in xrange(height - 1)]
+                                  dtype=tf.float32) for _ in range(height - 1)]
       first = tf.concat(2, first)
 
       # Computation steps.
@@ -227,13 +227,13 @@ class NeuralGPU(object):
       step = [tf.nn.dropout(first, keep_prob) * mask]
       act_noise_scale = act_noise * self.do_training * self.pull
       outputs = []
-      for it in xrange(length):
+      for it in range(length):
         with tf.variable_scope("RX%d" % (it % rx_step)) as vs:
           if it >= rx_step:
             vs.reuse_variables()
           cur = step[it]
           # Do nconvs-many CGRU steps.
-          for layer in xrange(nconvs):
+          for layer in range(nconvs):
             cur = conv_gru([], cur, kw, kh, nmaps, cutoff, "cgru_%d" % layer)
             cur *= mask
           outputs.append(tf.slice(cur, [0, 0, 0, 0], [-1, -1, 1, -1]))
@@ -245,7 +245,7 @@ class NeuralGPU(object):
       self.steps.append([tf.reshape(s, [-1, length, height * nmaps])
                          for s in step])
       # Output is the n-th step output; n = current length, as in scales.
-      output = tf.add_n([outputs[i] * scales[i] for i in xrange(length)])
+      output = tf.add_n([outputs[i] * scales[i] for i in range(length)])
       # Final convolution to get logits, list outputs.
       output = conv_linear(output, 1, 1, nmaps, noclass, True, 0.0, "output")
       output = tf.reshape(output, [-1, length, noclass])
@@ -256,7 +256,7 @@ class NeuralGPU(object):
 
       # Calculate cross-entropy loss and normalize it.
       targets = tf.concat(1, [make_dense(self.target[l], noclass)
-                              for l in xrange(length)])
+                              for l in range(length)])
       targets = tf.reshape(targets, [-1, noclass])
       xent = tf.reshape(tf.nn.softmax_cross_entropy_with_logits(
           tf.reshape(output, [-1, noclass]), targets), [-1, length])
@@ -280,7 +280,7 @@ class NeuralGPU(object):
         for grad in grads:
           if isinstance(grad, tf.Tensor):
             grad += tf.truncated_normal(tf.shape(grad)) * self.noise_param
-        update = adam.apply_gradients(zip(grads, params),
+        update = adam.apply_gradients(list(zip(grads, params)),
                                       global_step=self.global_step)
         self.updates.append(update)
       data_utils.print_out("Created model for bin of length %d in"
@@ -303,13 +303,13 @@ class NeuralGPU(object):
       feed_out.append(self.updates[index])
       feed_out.append(self.grad_norms[index])
     feed_out.append(self.losses[index])
-    for l in xrange(length):
+    for l in range(length):
       feed_in[self.input[l].name] = inp[l]
-    for l in xrange(length):
+    for l in range(length):
       feed_in[self.target[l].name] = target[l]
       feed_out.append(self.outputs[index][l])
     if get_steps:
-      for l in xrange(length+1):
+      for l in range(length+1):
         feed_out.append(self.steps[index][l])
     res = sess.run(feed_out, feed_in)
     offset = 0

@@ -147,13 +147,13 @@ class GraphBuilderTest(test_util.TensorFlowTestCase):
     # The following session runs should not fail.
     with self.test_session(graph=custom_train_graph) as sess:
       self.assertTrue(self.NodeFound('training/logits'))
-      sess.run(train_parser.inits.values())
+      sess.run(list(train_parser.inits.values()))
       sess.run(['training/logits:0'])
 
     with self.test_session(graph=custom_eval_graph) as sess:
       self.assertFalse(self.NodeFound('training/logits'))
       self.assertTrue(self.NodeFound('evaluation/logits'))
-      sess.run(eval_parser.inits.values())
+      sess.run(list(eval_parser.inits.values()))
       sess.run(['evaluation/logits:0'])
 
   def testTrainingAndEvalAreIndependent(self):
@@ -168,7 +168,7 @@ class GraphBuilderTest(test_util.TensorFlowTestCase):
                            batch_size,
                            corpus_name='tuning-corpus')
     with self.test_session(graph=graph) as sess:
-      sess.run(parser.inits.values())
+      sess.run(list(parser.inits.values()))
       # Before any training updates are performed, both training and eval nets
       # should return the same computations.
       eval_logits, = sess.run([parser.evaluation['logits']])
@@ -196,7 +196,7 @@ class GraphBuilderTest(test_util.TensorFlowTestCase):
                              batch_size,
                              corpus_name='tuning-corpus')
       with self.test_session(graph=graph) as sess:
-        sess.run(parser.inits.values())
+        sess.run(list(parser.inits.values()))
         for _ in range(5):
           cost, _ = sess.run([parser.training['cost'],
                               parser.training['train_op']])
@@ -219,7 +219,7 @@ class GraphBuilderTest(test_util.TensorFlowTestCase):
                            batch_size,
                            corpus_name='tuning-corpus')
     with self.test_session(graph=graph1) as sess:
-      sess.run(parser.inits.values())
+      sess.run(list(parser.inits.values()))
       metrics1 = None
       for _ in range(500):
         cost1, _ = sess.run([parser.training['cost'],
@@ -238,7 +238,7 @@ class GraphBuilderTest(test_util.TensorFlowTestCase):
                          batch_size,
                          corpus_name='training-corpus')
     with self.test_session(graph=graph2) as sess:
-      sess.run(parser.inits.values())
+      sess.run(list(parser.inits.values()))
       metrics2 = None
       for _ in range(500):
         cost2, _ = sess.run([parser.training['cost'],
@@ -258,7 +258,7 @@ class GraphBuilderTest(test_util.TensorFlowTestCase):
                            batch_size,
                            corpus_name='tuning-corpus')
     with self.test_session(graph=graph) as sess:
-      sess.run(parser.inits.values())
+      sess.run(list(parser.inits.values()))
       tokens = 0
       correct_heads = 0
       for _ in range(100):
@@ -306,7 +306,7 @@ class GraphBuilderTest(test_util.TensorFlowTestCase):
                          batch_size,
                          corpus_name='training-corpus')
     with self.test_session(graph=graph) as sess:
-      sess.run(parser.inits.values())
+      sess.run(list(parser.inits.values()))
       # Before training, save the state of two of the parameters.
       bias0, weight0 = sess.run([parser.params['softmax_bias'],
                                  parser.params['softmax_weight']])

@@ -15,4 +15,4 @@ dobj = demo_lib.get_dependent_object(dep_tree)
 synonym = demo_lib.get_synonym(root)
 
 #display
-print 'intent is | ' + synonym + ' ' + dobj
+print('intent is | ' + synonym + ' ' + dobj)

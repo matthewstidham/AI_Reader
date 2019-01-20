@@ -20,9 +20,9 @@ Methods of Data class:
   num_classes: Returns the number of classes in the data set.
   reader: Return a reader for a single entry from the data set.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 from abc import ABCMeta
 from abc import abstractmethod
@@ -39,9 +39,8 @@ tf.app.flags.DEFINE_string('data_dir', '/tmp/mydata',
                            """TFRecord of Example protos.""")
 
 
-class Dataset(object):
+class Dataset(object, metaclass=ABCMeta):
   """A simple class for handling data sets."""
-  __metaclass__ = ABCMeta
 
   def __init__(self, name, subset):
     """Initialize dataset using a subset and the path to the data."""

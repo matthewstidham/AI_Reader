@@ -81,9 +81,9 @@ def main(unused_argv):
         sentence.ParseFromString(d)
         tr = asciitree.LeftAligned()
         d = to_dict(sentence)
-        print 'Input: %s' % sentence.text
-        print 'Parse:'
-        print tr(d)
+        print('Input: %s' % sentence.text)
+        print('Parse:')
+        print(tr(d))
 
       if finished:
         break

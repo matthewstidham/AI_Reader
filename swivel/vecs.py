@@ -71,7 +71,7 @@ class Vecs(object):
 
   def neighbors(self, query):
     """Returns the nearest neighbors to the query (a word or vector)."""
-    if isinstance(query, basestring):
+    if isinstance(query, str):
       idx = self.word_to_idx.get(query)
       if idx is None:
         return None
